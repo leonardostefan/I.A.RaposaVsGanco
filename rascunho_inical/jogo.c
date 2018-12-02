@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     {
         tabuleiro_recebe(buf);
         getBoard(buf, root->board);
-        printBoard(root->board);
+        //printBoard(root->board);
 
         int choiceIndex = 0, choiceH = -__INT_MAX__;
         {
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
             break;
         printf( "%s\n", linha);
 
-        sprintf(buf, "%s\n", linha);
+        //sprintf(buf, "%s\n", linha);
         // free(linha);
         tabuleiro_envia(buf);
         liberdade(root);

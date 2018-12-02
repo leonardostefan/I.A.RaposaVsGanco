@@ -11,7 +11,7 @@
 #define min(a, b) a < b ? a : b
 #define absoluto(a) a > 0 ? a : -a
 #define MAXMOVESTR 256
-#define K_ganco 2
+#define K_ganco 1
 char mySide;
 
 typedef struct Node

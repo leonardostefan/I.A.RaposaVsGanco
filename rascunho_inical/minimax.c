@@ -35,10 +35,10 @@ int alphabeta(Node *node, int depth, int alpha, int beta, int maximizingPlayer)
         {
             value = max(value, alphabeta(node->children[i], depth - 1, alpha, beta, FALSE));
             alpha = max(alpha, value);
-            // if (alpha <= beta)
-            // {
-            //     break;
-            // }
+            if (alpha <= beta)
+            {
+                break;
+            }
         }
         return value;
     }
@@ -50,10 +50,10 @@ int alphabeta(Node *node, int depth, int alpha, int beta, int maximizingPlayer)
         {
             value = min(value, alphabeta(node->children[i], depth - 1, alpha, beta, TRUE));
             beta = min(beta, value);
-            // if (alpha <= beta)
-            // {
-            //     break;
-            // }
+            if (alpha <= beta)
+            {
+                break;
+            }
         }
         return value;
     }
@@ -524,22 +524,17 @@ int endGame(Node *node)
 
 void liberdade (Node *head){
 
-    printf ("\n\n CRIANÇAS FELIZES NO MATADOURO: %d\n\n", head->childrenSize);
        while (head->childrenSize > 0){
             for (int i = head->childrenSize-1; i >= 0; i--){
                 if (head->children[i]->childrenSize == 0){
-                    printf ("\n MATANDO A CRIANÇA \n");
                     free (head->children[i]);
                 }
                 else{
-                    printf ("\n ENVIANDO CRIANÇAS PARA OUTRO MATADOURO \n");
                     liberdade(head->children[i]);
                 }
                 head->childrenSize--;
-                printf ("\n\n CRIANÇAS FELIZES NO MATADOURO: %d\n\n", head->childrenSize);
             }
         }
         
         free(head->children);
-        printf ("\n\n CRIANÇAS QUE ESCAPARAM: %d\n\n", head->childrenSize);
 }

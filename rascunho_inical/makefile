@@ -1,4 +1,4 @@
-CFLAGS = -g -Wall -Wno-unused-result 
+CFLAGS = -g -Wall -Wno-unused-result -O3
 LDLIBS = -l hiredis -l readline
 
 all: jogo
