@@ -438,25 +438,28 @@ int distancia(int x1, int y1, int x2, int y2)
     return absoluto(x1 - x2) + absoluto(y1 - y2);
 }
 
-//Verificação se o ganço esta seguro
 int gansoSeguro(int x, int y, char **field)
-{ //pode morrer na horizontal
+{
+    if ((field[x + 1][y] == '-' && field[x - 1][y] == '-') && (field[x][y - 1] == '-' && field[x][y + 1] == '-'))
+        return 0;
+
+    //pode morrer na horizontal
     if (field[x + 1][y] == '-' && field[x - 1][y] == '-')
     {
-        return 0;
+        return 1;
     }
     //pode morrer na vertical
     if (field[x][y - 1] == '-' && field[x][y + 1] == '-')
     {
-        return 0;
+        return 1;
     }
     //ganço completamente seguro
     if ((field[x][y - 1] == '#' || field[x][y + 1] == '#') && (field[x + 1][y] == '#' || field[x - 1][y] == '#'))
     {
-        return 2;
+        return 3;
     }
     //se não caiu nos outros casos, apenas seguro
-    return 1;
+    return 2;
 }
 
 int endGame(Node *node)
