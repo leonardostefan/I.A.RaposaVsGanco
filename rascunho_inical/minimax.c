@@ -521,3 +521,26 @@ int endGame(Node *node)
     }
     return FALSE;
 }
+
+void liberdade (Node *head){
+
+    printf ("\n\n CRIANÇAS FELIZES NO MATADOURO: %d\n\n", head->childrenSize);
+    if (head->childrenSize > 0){
+        for (int i = head->childrenSize-1; i >= 0; i--){
+            if (head->children[i]->childrenSize == 0){
+                printf ("\n MATANDO A CRIANÇA \n");
+                free (head->children[i]);
+            }
+            else{
+                printf ("\n ENVIANDO CRIANÇAS PARA OUTRO MATADOURO \n");
+                liberdade(head->children[i]);
+            }
+            head->childrenSize--;
+            printf ("\n\n CRIANÇAS FELIZES NO MATADOURO: %d\n\n", head->childrenSize);
+        }
+    }
+    else{
+        free(head->children);
+        printf ("\n\n CRIANÇAS QUE ESCAPARAM: %d\n\n", head->childrenSize);
+    }
+}

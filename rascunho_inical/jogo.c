@@ -53,6 +53,7 @@ int main(int argc, char **argv)
         sprintf(buf, "%s\n", linha);
         // free(linha);
         tabuleiro_envia(buf);
+        liberdade(root);
     }
 }
 

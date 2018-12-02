@@ -47,5 +47,7 @@ int h(Node *node);
 int distancia(int x1, int y1, int x2, int y2);
 //Verifixação se o ganço esta seguro
 int gansoSeguro(int x, int y, char field[9][9]);
+//Free na lista dos nodos abertos
+void liberdade (Node *head);
 
 #endif
