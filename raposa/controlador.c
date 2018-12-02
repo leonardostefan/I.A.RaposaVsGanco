@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <hiredis/hiredis.h>
+#include "./hiredis/hiredis.h"
 
 #define MAXSTR 512
 #define MAXINT 16
@@ -55,7 +55,7 @@ int pos_valida(int l, int c) {
 
 int parse(char *jogada, char *lado, char *tipo,
 	  int *num_mov, int *mov_l, int *mov_c) {
-  int i;
+  int i, p;
   char *s;
 
   if(!(s = strtok(jogada, " \n")) || sscanf(s , "%c", lado) != 1)
@@ -89,6 +89,12 @@ int parse(char *jogada, char *lado, char *tipo,
 	return 0;
     }
   }    
+  p = 0;
+  p += sprintf(&(jogada[p]), "%c %c", *lado, *tipo);
+  if(*tipo == 's')
+    p += sprintf(&(jogada[p]), " %d", *num_mov);
+  for(i = 0; i < *num_mov; i++)
+    p += sprintf(&(jogada[p]), " %d %d", mov_l[i], mov_c[i]);
   return 1;
 }
 
@@ -212,9 +218,9 @@ int main(int argc, char **argv) {
 
   vencedor = ' ';
   
-  printf("%d: %s\n", num_jogadas, tabuleiro);
+  printf("%d:\n%s", num_jogadas, tabuleiro);
 
-  sprintf(buffer, "%c %s\n%c n\n", quem_joga, tabuleiro, OUTRO(quem_joga));
+  sprintf(buffer, "%c\n%c n\n%s", quem_joga, OUTRO(quem_joga), tabuleiro);
 
   while(num_jogadas) {
     sprintf(key, "tabuleiro_%c", quem_joga);
@@ -240,7 +246,7 @@ int main(int argc, char **argv) {
       sprintf(jogada, "%c n", quem_joga);
 
     printf("%d: %s\n", num_jogadas, jogada);
-    printf("%d: %s\n", num_jogadas, tabuleiro);
+    printf("%s", tabuleiro);
 
     if(vitoria(quem_joga, tabuleiro)) {
       printf("%d: vitória de %c\n", num_jogadas, quem_joga);
@@ -249,15 +255,15 @@ int main(int argc, char **argv) {
     }
     
     quem_joga = OUTRO(quem_joga);
-    sprintf(buffer, "%c %s\n%s\n", quem_joga, tabuleiro, jogada);
+    sprintf(buffer, "%c\n%s\n%s", quem_joga, jogada, tabuleiro);
     num_jogadas--;
   }
 
-  sprintf(buffer, "r %s\ng n\n", tabuleiro);
+  sprintf(buffer, "r\ng n\n%s", tabuleiro);
   r = redisCommand(c, "RPUSH tabuleiro_r %s", buffer);
   freeReplyObject(r);
 
-  sprintf(buffer, "g %s\nr n\n", tabuleiro);
+  sprintf(buffer, "g\nr n\n%s", tabuleiro);
   r = redisCommand(c, "RPUSH tabuleiro_g %s", buffer);
   freeReplyObject(r);
 

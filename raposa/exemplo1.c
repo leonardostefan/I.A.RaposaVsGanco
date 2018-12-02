@@ -41,19 +41,21 @@ int main(int argc, char **argv) {
       sscanf(strtok(NULL, " \n"), "%d", &(mov_adv_c[i]));
     }
   }
-  strncpy(tabuleiro, strtok(NULL, " \n"), MAXSTR);
+  strncpy(tabuleiro, strtok(NULL, "."), MAXSTR);
 
   // mostra o que recebeu
   printf("%c\n", lado_meu);
   printf("%c %c", lado_adv, tipo_mov_adv);
-  if(tipo_mov_adv == 's') 
-    printf(" %d", num_mov_adv);
-  for(i = 0; i < num_mov_adv; i++) {
-    printf(" %d", mov_adv_l[i]);
-    printf(" %d", mov_adv_c[i]);
+  if(tipo_mov_adv != 'n') {
+    if(tipo_mov_adv == 's') 
+      printf(" %d", num_mov_adv);
+    for(i = 0; i < num_mov_adv; i++) {
+      printf(" %d", mov_adv_l[i]);
+      printf(" %d", mov_adv_c[i]);
+    }
   }
   printf("\n");
-  printf("%s\n", tabuleiro);
+  printf("%s", tabuleiro);
   
   // prepara um string com o movimento
   if(lado_meu == 'r')

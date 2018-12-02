@@ -11,3 +11,6 @@ exemplo2: tabuleiro.h tabuleiro.c exemplo2.c
 
 clean:
 	rm -f controlador exemplo1 exemplo2 
+
+start:
+	(redis-server redis.conf & ); (./controlador r 50 5)
