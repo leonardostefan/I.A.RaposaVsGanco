@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "./hiredis/hiredis.h"
+#include <hiredis/hiredis.h>
 
 #define MAXSTR 512
 #define MAXINT 16
@@ -174,13 +174,13 @@ int vitoria(char lado, char *tabuleiro) {
   for(l = 1; l < 8; l++)
     for(c = 1; c < 8; c++)
       if(tabuleiro[POS(l,c)] == 'r') {
-	if(pos_valida(l-1,c) && tabuleiro[POS(l-1,c)] == '-')
+	if((pos_valida(l-1,c) && tabuleiro[POS(l-1,c)] == '-')||(pos_valida(l-2,c) && tabuleiro[POS(l-2,c)] == '-'))
 	  return 0;
-	if(pos_valida(l+1,c) && tabuleiro[POS(l+1,c)] == '-')
+	if((pos_valida(l+1,c) && tabuleiro[POS(l+1,c)] == '-')||(pos_valida(l+2,c) && tabuleiro[POS(l+2,c)] == '-'))
 	  return 0;
-	if(pos_valida(l,c-1) && tabuleiro[POS(l,c-1)] == '-')
+	if((pos_valida(l,c-1) && tabuleiro[POS(l,c-1)] == '-')||(pos_valida(l,c-2) && tabuleiro[POS(l,c-2)] == '-'))
 	  return 0;
-	if(pos_valida(l,c+1) && tabuleiro[POS(l,c+1)] == '-')
+	if((pos_valida(l,c+1) && tabuleiro[POS(l,c+1)] == '-')||(pos_valida(l,c+2) && tabuleiro[POS(l,c+2)] == '-'))
 	  return 0;
 	return 1;
       }

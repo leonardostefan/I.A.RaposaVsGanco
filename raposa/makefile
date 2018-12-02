@@ -1,16 +1,13 @@
 CFLAGS = -g -Wall -Wno-unused-result -O3
 LDLIBS = -l hiredis -l readline
 
-all:  exemplo1 jogo
+all: controlador exemplo1 exemplo2
 
-# controlador: controlador.c
+controlador: controlador.c
 
 exemplo1: tabuleiro.h tabuleiro.c exemplo1.c
 
-jogo: tabuleiro.h tabuleiro.c jogo.c
+exemplo2: tabuleiro.h tabuleiro.c exemplo2.c
 
 clean:
-	rm -f controlador exemplo1 jogo 
-
-start:
-	(redis-server redis.conf & ); ./controlador r 50 5
+	rm -f controlador exemplo1 exemplo2 

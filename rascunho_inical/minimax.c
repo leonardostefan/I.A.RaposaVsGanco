@@ -62,15 +62,18 @@ int alphabeta(Node *node, int depth, int alpha, int beta, int maximizingPlayer)
 //encontra e atribui todos os possiveis movimentos a node->nodeChildren
 void getNodeChildren(Node *node, char foxMove)
 {
-    char **board = boardCopy(node->board);
+    char board[9][9];
+    boardCopy(node->board, board);
 
-    Node **children = calloc(1, sizeof(Node *));
+    Node **children = calloc(100, sizeof(Node *));
     children[0] = calloc(1, sizeof(Node));
-    children[0]->board = board;
+    boardCopy(board, children[0]->board);
     children[0]->children = 0;
     children[0]->childrenSize = 0;
     sprintf(children[0]->move, "r n"); //movimento invalido
+    children[1] = children[0];
     node->children = children;
+    node->childrenSize = 1;
 
     //se for movivmento da raposa
     if (foxMove == 'r')
@@ -98,18 +101,22 @@ void getNodeChildren(Node *node, char foxMove)
         //TODO: encontrar todos os nodos resultantes pra ganço;
         searchGeeseMoves(node);
     }
+    for (int i = 0; i < node->childrenSize; i++)
+    {
+        if (node->children[i] == NULL)
+            printf("Erro");
+    }
 }
 //calcula heuristica para o nodo
 int h(Node *node)
 {
-    char **board = node->board;
     int result = 0;
     int rL, rC;
     for (int i = 0; i < 9; i++)
     {
         for (int j = 0; j < 9; j++)
         {
-            if (board[i][j] == 'r')
+            if (node->board[i][j] == 'r')
             {
                 rL = i;
                 rC = j;
@@ -122,15 +129,16 @@ int h(Node *node)
     {
         for (int j = 0; j < 9; j++)
         {
-            if (board[i][j] == 'g')
+            if (node->board[i][j] == 'g')
             {
                 int d = distancia(rL, rC, i, j);
 
-                hDist += 80 - (d * d);                        // Distancia maxima² - distancia²  para "aproximar os ganços da raposa
-                hSeg += (K_ganco + gansoSeguro(i, j, board)); // K_ganco(valor não muito alto nem muito baixo para afetar no peso) + fator de segurança do ganço
+                hDist += 80 - (d * d);                              // Distancia maxima² - distancia²  para "aproximar os ganços da raposa
+                hSeg += (K_ganco + gansoSeguro(i, j, node->board)); // K_ganco(valor não muito alto nem muito baixo para afetar no peso) + fator de segurança do ganço
             }
         }
     }
+    hSeg=1;
     result = hDist * hSeg;
 
     if (mySide == 'g')
@@ -142,7 +150,7 @@ int h(Node *node)
         return (-result);
     }
 }
-void searchFoxMove(int l, int c, char **board, Node *node, int attackChainIndex)
+void searchFoxMove(int l, int c, char board[9][9], Node *node, int attackChainIndex)
 {
     //se não estiver em uma cadeia de ataque
     if (attackChainIndex == FALSE)
@@ -152,51 +160,51 @@ void searchFoxMove(int l, int c, char **board, Node *node, int attackChainIndex)
             if (board[l + 1][c] == '-')
             {
                 Node *newNode = calloc(1, sizeof(Node));
-                newNode->board = boardCopy(board);
+                boardCopy(board, newNode->board);
                 newNode->board[l][c] = '-';
                 newNode->board[l + 1][c] = 'r';
                 sprintf(newNode->move, "r m %d %d %d %d", l, c, (l + 1), c);
 
                 node->childrenSize++;
-                node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+                node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
                 node->children[node->childrenSize - 1] = newNode;
             }
 
             if (board[l - 1][c] == '-')
             {
                 Node *newNode = calloc(1, sizeof(Node));
-                newNode->board = boardCopy(board);
+                boardCopy(board, newNode->board);
                 newNode->board[l][c] = '-';
                 newNode->board[l - 1][c] = 'r';
                 sprintf(newNode->move, "r m %d %d %d %d", l, c, (l - 1), c);
 
                 node->childrenSize++;
-                node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+                node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
                 node->children[node->childrenSize - 1] = newNode;
             }
 
             if (board[l][c + 1] == '-')
             {
                 Node *newNode = calloc(1, sizeof(Node));
-                newNode->board = boardCopy(board);
+                boardCopy(board, newNode->board);
                 newNode->board[l][c] = '-';
                 newNode->board[l][c + 1] = 'r';
                 sprintf(newNode->move, "r m %d %d %d %d", l, c, l, (c + 1));
 
                 node->childrenSize++;
-                node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+                node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
                 node->children[node->childrenSize - 1] = newNode;
             }
             if (board[l][c - 1] == '-')
             {
                 Node *newNode = calloc(1, sizeof(Node));
-                newNode->board = boardCopy(board);
+                boardCopy(board, newNode->board);
                 newNode->board[l][c] = '-';
                 newNode->board[l][c - 1] = 'r';
                 sprintf(newNode->move, "r m %d %d %d %d", l, c, l, (c - 1));
 
                 node->childrenSize++;
-                node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+                node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
                 node->children[node->childrenSize - 1] = newNode;
             }
         }
@@ -205,14 +213,14 @@ void searchFoxMove(int l, int c, char **board, Node *node, int attackChainIndex)
             if ((board[l + 1][c] == 'g') && (board[l + 2][c] == '-'))
             {
                 Node *newNode = calloc(1, sizeof(Node));
-                newNode->board = boardCopy(board);
+                boardCopy(board, newNode->board);
                 newNode->board[l][c] = '-';
                 newNode->board[l + 1][c] = '-';
                 newNode->board[l + 2][c] = 'r';
                 sprintf(newNode->move, "r s 1 %d %d %d %d", l, c, (l + 2), c);
 
                 node->childrenSize++;
-                node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+                node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
                 node->children[node->childrenSize - 1] = newNode;
 
                 char chain[250];
@@ -223,14 +231,14 @@ void searchFoxMove(int l, int c, char **board, Node *node, int attackChainIndex)
             if ((board[l - 1][c] == 'g') && (board[l - 2][c] == '-'))
             {
                 Node *newNode = calloc(1, sizeof(Node));
-                newNode->board = boardCopy(board);
+                boardCopy(board, newNode->board);
                 newNode->board[l][c] = '-';
                 newNode->board[l - 1][c] = '-';
                 newNode->board[l - 2][c] = 'r';
                 sprintf(newNode->move, "r s 1 %d %d %d %d", l, c, (l - 2), c);
 
                 node->childrenSize++;
-                node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+                node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
                 node->children[node->childrenSize - 1] = newNode;
 
                 char chain[250];
@@ -241,14 +249,14 @@ void searchFoxMove(int l, int c, char **board, Node *node, int attackChainIndex)
             if ((board[l][c + 1] == 'g') && (board[l][c + 2] == '-'))
             {
                 Node *newNode = calloc(1, sizeof(Node));
-                newNode->board = boardCopy(board);
+                boardCopy(board, newNode->board);
                 newNode->board[l][c] = '-';
                 newNode->board[l][c + 1] = '-';
                 newNode->board[l][c + 2] = 'r';
                 sprintf(newNode->move, "r s 1 %d %d %d %d", l, c, l, (c + 2));
 
                 node->childrenSize++;
-                node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+                node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
                 node->children[node->childrenSize - 1] = newNode;
 
                 char chain[250];
@@ -258,14 +266,14 @@ void searchFoxMove(int l, int c, char **board, Node *node, int attackChainIndex)
             if ((board[l][c - 1] == 'g') && (board[l][c - 2] == '-'))
             {
                 Node *newNode = calloc(1, sizeof(Node));
-                newNode->board = boardCopy(board);
+                boardCopy(board, newNode->board);
                 newNode->board[l][c] = '-';
                 newNode->board[l][c - 1] = '-';
                 newNode->board[l][c - 2] = 'r';
                 sprintf(newNode->move, "r s 1 %d %d %d %d", l, c, l, (c - 2));
 
                 node->childrenSize++;
-                node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+                node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
                 node->children[node->childrenSize - 1] = newNode;
 
                 char chain[250];
@@ -275,21 +283,21 @@ void searchFoxMove(int l, int c, char **board, Node *node, int attackChainIndex)
         }
     }
 }
-void recursiveFoxAttack(int l, int c, char **board, Node *node, int attackNumber, char *attackChain)
+void recursiveFoxAttack(int l, int c, char board[9][9], Node *node, int attackNumber, char *attackChain)
 {
 
     {
         if ((board[l + 1][c] == 'g') && (board[l + 2][c] == '-'))
         {
             Node *newNode = calloc(1, sizeof(Node));
-            newNode->board = boardCopy(board);
+            boardCopy(board, newNode->board);
             newNode->board[l][c] = '-';
             newNode->board[l + 1][c] = '-';
             newNode->board[l + 2][c] = 'r';
             sprintf(newNode->move, "r s %d %s %d %d", attackNumber + 1, attackChain, (l + 2), c);
 
             node->childrenSize++;
-            node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+            node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
             node->children[node->childrenSize - 1] = newNode;
 
             char chain[250];
@@ -301,14 +309,14 @@ void recursiveFoxAttack(int l, int c, char **board, Node *node, int attackNumber
         if ((board[l - 1][c] == 'g') && (board[l - 2][c] == '-'))
         {
             Node *newNode = calloc(1, sizeof(Node));
-            newNode->board = boardCopy(board);
+            boardCopy(board, newNode->board);
             newNode->board[l][c] = '-';
             newNode->board[l - 1][c] = '-';
             newNode->board[l - 2][c] = 'r';
             sprintf(newNode->move, "r s %d %s %d %d", attackNumber + 1, attackChain, (l - 2), c);
 
             node->childrenSize++;
-            node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+            node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
             node->children[node->childrenSize - 1] = newNode;
 
             char chain[250];
@@ -319,14 +327,14 @@ void recursiveFoxAttack(int l, int c, char **board, Node *node, int attackNumber
         if ((board[l][c + 1] == 'g') && (board[l][c + 2] == '-'))
         {
             Node *newNode = calloc(1, sizeof(Node));
-            newNode->board = boardCopy(board);
+            boardCopy(board, newNode->board);
             newNode->board[l][c] = '-';
             newNode->board[l][c + 1] = '-';
             newNode->board[l][c + 2] = 'r';
             sprintf(newNode->move, "r s %d %s %d %d", attackNumber + 1, attackChain, l, (c + 2));
 
             node->childrenSize++;
-            node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+            node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
             node->children[node->childrenSize - 1] = newNode;
 
             char chain[250];
@@ -336,14 +344,14 @@ void recursiveFoxAttack(int l, int c, char **board, Node *node, int attackNumber
         if ((board[l][c - 1] == 'g') && (board[l][c - 2] == '-'))
         {
             Node *newNode = calloc(1, sizeof(Node));
-            newNode->board = boardCopy(board);
+            boardCopy(board, newNode->board);
             newNode->board[l][c] = '-';
             newNode->board[l][c - 1] = '-';
             newNode->board[l][c - 2] = 'r';
             sprintf(newNode->move, "r s %d %s %d %d", attackNumber + 1, attackChain, l, (c - 2));
 
             node->childrenSize++;
-            node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
+            node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
             node->children[node->childrenSize - 1] = newNode;
 
             char chain[250];
@@ -352,85 +360,85 @@ void recursiveFoxAttack(int l, int c, char **board, Node *node, int attackNumber
         }
     }
 }
-int *searchGeeseMoves(Node *node)
+int searchGeeseMoves(Node *node)
 {
-    char **board = boardCopy(node->board);
     for (int i = 0; i < 9; i++)
     {
         for (int j = 0; j < 9; j++)
         {
-            if (board[i][j] == 'g')
+            if (node->board[i][j] == 'g')
             {
                 //Movimentos
-                if (board[i + 1][j] == '-')
+                if (node->board[i + 1][j] == '-')
                 {
                     Node *newNode = calloc(1, sizeof(Node));
-                    newNode->board = boardCopy(board);
+                    boardCopy(node->board, newNode->board);
                     newNode->board[i][j] = '-';
                     newNode->board[i + 1][j] = 'g';
                     sprintf(newNode->move, "g m %d %d %d %d", i, j, (i + 1), j);
 
                     node->childrenSize++;
-                    node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
-                    node->children[node->childrenSize - 1] = newNode;
+                    // node->children = realloc(node->d, (node->childrenSize) * sizeof(Node *));
+                    int index = (node->childrenSize - 1);
+                    node->children[index] = newNode;
                 }
 
-                if (board[i - 1][j] == '-')
+                if (node->board[i - 1][j] == '-')
                 {
                     Node *newNode = calloc(1, sizeof(Node));
-                    newNode->board = boardCopy(board);
+                    boardCopy(node->board, newNode->board);
                     newNode->board[i][j] = '-';
                     newNode->board[i - 1][j] = 'g';
                     sprintf(newNode->move, "g m %d %d %d %d", i, j, (i - 1), j);
 
                     node->childrenSize++;
-                    node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
-                    node->children[node->childrenSize - 1] = newNode;
+                    // node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
+                    node->children[(node->childrenSize - 1)] = newNode;
                 }
 
-                if (board[i][j + 1] == '-')
+                if (node->board[i][j + 1] == '-')
                 {
                     Node *newNode = calloc(1, sizeof(Node));
-                    newNode->board = boardCopy(board);
+                    boardCopy(node->board, newNode->board);
                     newNode->board[i][j] = '-';
                     newNode->board[i][j + 1] = 'g';
                     sprintf(newNode->move, "g m %d %d %d %d", i, j, i, (j + 1));
 
                     node->childrenSize++;
-                    node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
-                    node->children[node->childrenSize - 1] = newNode;
+                    // node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
+                    node->children[(node->childrenSize - 1)] = newNode;
                 }
-                if (board[i][j - 1] == '-')
+                if (node->board[i][j - 1] == '-')
                 {
                     Node *newNode = calloc(1, sizeof(Node));
-                    newNode->board = boardCopy(board);
+                    boardCopy(node->board, newNode->board);
                     newNode->board[i][j] = '-';
                     newNode->board[i][j - 1] = 'g';
                     sprintf(newNode->move, "g m %d %d %d %d", i, j, i, (j - 1));
 
                     node->childrenSize++;
-                    node->children = realloc(node->children, node->childrenSize * sizeof(Node *));
-                    node->children[node->childrenSize - 1] = newNode;
+                    // node->children = realloc(node->children, (node->childrenSize) * sizeof(Node *));
+                    node->children[(node->childrenSize - 1)] = newNode;
                 }
             }
         }
     }
-    return (node->childrenSize);
+    int result = node->childrenSize;
+    return (result);
 }
 
 //copia em nova area de memoria
-char **boardCopy(char **oldBoard)
+void boardCopy(char oldBoard[9][9], char board[9][9])
 {
-    char **board = calloc(9, sizeof(char *));
+    // char board[9][9] = calloc(9, sizeof(char *));
     for (int i = 0; i < 9; i++)
     {
-        board[i] = calloc(9, sizeof(char));
+        // board[i] = calloc(9, sizeof(char));
         for (int j = 0; j < 9; j++)
         {
             board[i][j] = oldBoard[i][j];
         }
     }
-    return board;
 }
 //Distancia de manhattan entre 2 ponto
 int distancia(int x1, int y1, int x2, int y2)
@@ -438,7 +446,7 @@ int distancia(int x1, int y1, int x2, int y2)
     return absoluto(x1 - x2) + absoluto(y1 - y2);
 }
 
-int gansoSeguro(int x, int y, char **field)
+int gansoSeguro(int x, int y, char field[9][9])
 {
     if ((field[x + 1][y] == '-' && field[x - 1][y] == '-') && (field[x][y - 1] == '-' && field[x][y + 1] == '-'))
         return 0;
@@ -464,19 +472,18 @@ int gansoSeguro(int x, int y, char **field)
 
 int endGame(Node *node)
 {
-    char **board = node->board;
     int l, c;
     int numG = 0;
     for (int i = 0; i < 9; i++)
     {
         for (int j = 0; j < 9; j++)
         {
-            if (board[i][j] == 'r')
+            if (node->board[i][j] == 'r')
             {
                 l = i;
                 c = j;
             }
-            if (board[i][j] == 'g')
+            if (node->board[i][j] == 'g')
             {
                 numG++;
             }
@@ -495,10 +502,10 @@ int endGame(Node *node)
     {
         int isTraped = TRUE;
 
-        if (((board[l + 1][c] == 'g') && (board[l + 2][c] == '-')) || (board[l + 1][c] == '-') ||
-            ((board[l - 1][c] == 'g') && (board[l - 2][c] == '-')) || (board[l - 1][c] == '-') ||
-            ((board[l][c + 1] == 'g') && (board[l][c + 2] == '-')) || (board[l][c + 1] == '-') ||
-            ((board[l][c - 1] == 'g') && (board[l][c - 2] == '-')) || (board[l][c - 1] == '-'))
+        if (((node->board[l + 1][c] == 'g') && (node->board[l + 2][c] == '-')) || (node->board[l + 1][c] == '-') ||
+            ((node->board[l - 1][c] == 'g') && (node->board[l - 2][c] == '-')) || (node->board[l - 1][c] == '-') ||
+            ((node->board[l][c + 1] == 'g') && (node->board[l][c + 2] == '-')) || (node->board[l][c + 1] == '-') ||
+            ((node->board[l][c - 1] == 'g') && (node->board[l][c - 2] == '-')) || (node->board[l][c - 1] == '-'))
         {
             isTraped = FALSE;
         }
